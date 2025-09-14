@@ -6,6 +6,9 @@ rust-version = "1.89.0"
 
 [dependencies]
 actix-web = "4"
+diesel = { version = "2.2.0", features = ["postgres"] }
+dotenvy = "0.15"
+
 
 [[bin]]
 name = "StarTracker-rustc"
