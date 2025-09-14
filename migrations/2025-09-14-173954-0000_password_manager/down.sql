@@ -1,2 +1,2 @@
 -- This file should undo anything in `up.sql`
-DROP TABLE user_data;
+drop table password_manager;

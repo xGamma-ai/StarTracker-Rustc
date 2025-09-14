@@ -1,0 +1,10 @@
+-- Your SQL goes here
+CREATE TABLE password_manager(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES user_data(id) ON DELETE CASCADE,
+    password_hash VARCHAR(255) NOT NULL,
+    salt VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id)
+);
