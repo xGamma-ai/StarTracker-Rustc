@@ -1,28 +1,12 @@
 pub mod models;
+pub mod routes;
 pub mod schema;
+pub mod user_access_management;
 
-use actix_web::{App, HttpResponse, HttpServer, Responder, get, post, web};
+use crate::user_access_management::*;
+use actix_web::{App, HttpResponse, HttpServer, Responder, web};
 use diesel::prelude::*;
 use dotenvy::dotenv;
-
-use crate::models::UserData;
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    use self::schema::user_data::dsl::*;
-    let results = user_data
-        .filter(id.eq(1))
-        .limit(5)
-        .select(UserData::as_select())
-        .load(&mut establish_connection())
-        .expect("Error pulling userData");
-    HttpResponse::Ok().body(format!("Hello world! {}", results[0].user_name))
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
 
 async fn health_check() -> impl Responder {
     HttpResponse::Ok().body("The Server is alive.")
@@ -38,8 +22,8 @@ async fn main() -> std::io::Result<()> {
         .expect("Port must be a number");
     HttpServer::new(|| {
         App::new()
-            .service(hello)
             .service(echo)
+            .service(verify_user)
             .route("/health", web::get().to(health_check))
     })
     .bind((host, port))?
