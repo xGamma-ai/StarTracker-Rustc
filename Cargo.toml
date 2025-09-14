@@ -2,6 +2,11 @@
 name = "StarTracker-rustc"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.89.0"
 
 [dependencies]
 actix-web = "4"
+
+[[bin]]
+name = "StarTracker-rustc"
+path = "src/main.rs"
