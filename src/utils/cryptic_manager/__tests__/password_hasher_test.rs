@@ -1,11 +1,10 @@
 use argon2::Argon2;
-use star_tracker_rustc::utils::password_hasher::login_password_hasher;
 use subtle::ConstantTimeEq;
 
 #[test]
 fn test_login_password_hasher_equal() {
     let password = format!("lwin_the_humble");
-    let hashed_password = login_password_hasher(&password);
+    let hashed_password = crate::utils::login_password_hasher(&password);
     let (u8_hash, salt) = hashed_password;
 
     let mut candidate = vec![0u8; u8_hash.len()];
@@ -24,7 +23,7 @@ fn test_login_password_hasher_equal() {
 fn test_login_password_hasher_not_equal() {
     let password = format!("lwin_the_humble");
     let password_test: String = format!("win_the_humble");
-    let hashed_password = login_password_hasher(&password);
+    let hashed_password = crate::utils::login_password_hasher(&password);
     let (u8_hash, salt) = hashed_password;
 
     let mut candidate = vec![0u8; u8_hash.len()];

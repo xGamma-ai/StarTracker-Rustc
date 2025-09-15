@@ -1,12 +1,12 @@
 use actix_web::{HttpResponse, Responder, post, web};
-use diesel::{RunQueryDsl, SelectableHelper};
+use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelper};
 
 use crate::{
     establish_connection,
-    models::{UserData, WriteNewUser, WriteNewUserPassword},
-    schema::password_manager,
-    user_access_management::serializers::UserRegisterInfo,
-    utils::login_password_hasher,
+    models::{UserData, UserPasswordDetails, WriteNewUser, WriteNewUserPassword},
+    schema::{password_manager, user_data},
+    user_access_management::serializers::{UserLoginInfo, UserRegisterInfo},
+    utils::{login_password_hasher, verify_pwd_state},
 };
 
 #[post("/echo")]
@@ -40,4 +40,28 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
         .expect("Failed to save the new hashed password");
 
     HttpResponse::Ok().body(format!("New User added {}", &req_body.user_name))
+}
+
+#[post("/login")]
+async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
+    let joined: Result<(UserData, UserPasswordDetails), diesel::result::Error> = user_data::table
+        .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
+        .filter(user_data::user_name.eq(&req_body.user_name))
+        .select((UserData::as_select(), UserPasswordDetails::as_select()))
+        .first(&mut establish_connection());
+    match joined {
+        Ok((user, pwd)) => {
+            if verify_pwd_state(&pwd.password_hash, &pwd.salt, &req_body.user_password) {
+                return HttpResponse::Ok().body("User Validated!");
+            }
+            println!("UserName : {} {}", user.user_name, pwd.salt);
+        }
+        Err(diesel::result::Error::NotFound) => {
+            return HttpResponse::NotFound().body("user not found");
+        }
+        Err(e) => {
+            return HttpResponse::InternalServerError().body("failed to execute login.");
+        }
+    }
+    return HttpResponse::InternalServerError().body("failed to execute login.");
 }

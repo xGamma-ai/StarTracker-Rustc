@@ -23,3 +23,11 @@ pub struct WriteNewUserPassword {
     pub password_hash: Vec<u8>,
     pub salt: String,
 }
+
+#[derive(Queryable, Selectable)]
+#[diesel(table_name = crate::schema::password_manager)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct UserPasswordDetails {
+    pub password_hash: Vec<u8>,
+    pub salt: String,
+}
