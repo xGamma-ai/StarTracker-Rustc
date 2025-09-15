@@ -4,10 +4,10 @@ diesel::table! {
     password_manager (id) {
         id -> Int4,
         user_id -> Int4,
-        #[max_length = 255]
-        password_hash -> Varchar,
+        password_hash -> Bytea,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        salt -> Text,
     }
 }
 

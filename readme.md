@@ -15,9 +15,15 @@ cargo binstall diesel_cli
 
 ## diesel.rs Migrations
 ```shell
-#Run diesel migration on a LOCAL instances to setup DB.
-#Any new migrations also need to have revert option inside donw.sql
+# Run diesel migration on a LOCAL instances to setup DB.
+# Any new migrations also need to have revert option inside donw.sql
 diesel migration run
+```
+
+## Run Tests
+```shell
+# Add tests are defined in tests/ directory. Run mod.rs with test
+cargo test --test mod
 ```
 
 ## Reqs:

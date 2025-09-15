@@ -20,5 +20,6 @@ pub struct WriteNewUser<'a> {
 #[diesel(table_name = crate::schema::password_manager)]
 pub struct WriteNewUserPassword {
     pub user_id: i32,
-    pub password_hash: String,
+    pub password_hash: Vec<u8>,
+    pub salt: String,
 }
