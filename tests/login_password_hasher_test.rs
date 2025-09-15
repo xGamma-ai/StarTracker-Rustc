@@ -1,5 +1,5 @@
-use StarTracker_rustc::utils::password_hasher::login_password_hasher;
 use argon2::Argon2;
+use star_tracker_rustc::utils::password_hasher::login_password_hasher;
 use subtle::ConstantTimeEq;
 
 #[test]

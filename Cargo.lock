@@ -3,20 +3,6 @@
 version = 4
 
 [[package]]
-name = "StarTracker-rustc"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "argon2",
- "diesel",
- "dotenvy",
- "openssl-sys",
- "pq-sys",
- "serde",
- "subtle",
-]
-
-[[package]]
 name = "actix-codec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1352,6 +1338,20 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
+name = "star_tracker_rustc"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "argon2",
+ "diesel",
+ "dotenvy",
+ "openssl-sys",
+ "pq-sys",
+ "serde",
+ "subtle",
+]
 
 [[package]]
 name = "strsim"

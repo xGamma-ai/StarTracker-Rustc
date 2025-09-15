@@ -1,5 +1,5 @@
 [package]
-name = "StarTracker-rustc"
+name = "star_tracker_rustc"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.89.0"
@@ -15,5 +15,5 @@ argon2 = {version = "0.5.3", features = ["std"]}
 subtle = "2.6.1"
 
 [[bin]]
-name = "StarTracker-rustc"
+name = "star_tracker_rustc"
 path = "src/main.rs"

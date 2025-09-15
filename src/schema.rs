@@ -16,8 +16,8 @@ diesel::table! {
         id -> Int4,
         user_name -> Varchar,
         user_email -> Text,
-        user_created_at -> Timestamp,
-        user_updated_at -> Timestamp,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
     }
 }
 
