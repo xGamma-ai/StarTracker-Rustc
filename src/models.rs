@@ -21,5 +21,4 @@ pub struct WriteNewUser<'a> {
 pub struct WriteNewUserPassword {
     pub user_id: i32,
     pub password_hash: String,
-    pub salt: String,
 }

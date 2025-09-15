@@ -2,6 +2,7 @@ pub mod models;
 pub mod routes;
 pub mod schema;
 pub mod user_access_management;
+pub mod utils;
 
 use crate::user_access_management::*;
 use actix_web::{App, HttpResponse, HttpServer, Responder, web};

@@ -6,8 +6,6 @@ diesel::table! {
         user_id -> Int4,
         #[max_length = 255]
         password_hash -> Varchar,
-        #[max_length = 255]
-        salt -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

@@ -19,11 +19,13 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
         user_email: &req_body.user_email,
         user_name: &req_body.user_name,
     };
-    diesel::insert_into(user_data::table)
+    let created_user = diesel::insert_into(user_data::table)
         .values(&new_user_data)
         .returning(UserData::as_returning())
         .get_result(&mut establish_connection())
         .expect("Failed to insert new user data.");
+
+    //if new username insertion is success. We proceed to hash and save User password.
 
     HttpResponse::Ok().body(format!("New User added {}", &req_body.user_name))
 }
