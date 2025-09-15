@@ -1,0 +1,2 @@
+ALTER TABLE user_data
+ADD COLUMN user_google_id TEXT DEFAULT '' NOT NULL;

@@ -24,6 +24,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(echo)
             .service(verify_user)
+            .service(register_user)
             .route("/health", web::get().to(health_check))
     })
     .bind((host, port))?
