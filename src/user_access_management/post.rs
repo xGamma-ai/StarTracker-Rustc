@@ -1,10 +1,9 @@
-use actix_web::{HttpResponse, Responder, http::StatusCode, post, web};
+use actix_web::{HttpResponse, Responder, post, web};
 use diesel::{RunQueryDsl, SelectableHelper};
 
 use crate::{
     establish_connection,
     models::{UserData, WriteNewUser},
-    schema::user_data,
     user_access_management::serializers::UserRegisterInfo,
 };
 
