@@ -22,8 +22,8 @@ diesel migration run
 
 ## Run Tests
 ```shell
-# Add tests are defined in tests/ directory. Run mod.rs with test
-cargo test --test mod
+# Add tests are defined in tests/ directory.
+cargo test
 ```
 
 ## Reqs:
