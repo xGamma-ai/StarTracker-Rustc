@@ -44,6 +44,7 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
 
 #[post("/login")]
 async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
+    println!("LOGIN REQUEST HAS BEEN HIT");
     let joined: Result<(UserData, UserPasswordDetails), diesel::result::Error> = user_data::table
         .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
         .filter(user_data::user_name.eq(&req_body.user_name))

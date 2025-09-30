@@ -10,6 +10,7 @@ use diesel::prelude::*;
 use dotenvy::dotenv;
 
 async fn health_check() -> impl Responder {
+    println!("A health update was requested");
     HttpResponse::Ok().body("The Server is alive.")
 }
 
