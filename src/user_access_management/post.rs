@@ -5,7 +5,10 @@ use crate::{
     establish_connection,
     models::{UserData, UserPasswordDetails, WriteNewUser, WriteNewUserPassword},
     schema::{password_manager, user_data},
-    user_access_management::serializers::{UserLoginInfo, UserRegisterInfo},
+    user_access_management::{
+        jwt::{UserToken, gen_jwt},
+        serializers::{PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
+    },
     utils::{login_password_hasher, verify_pwd_state},
 };
 
@@ -44,7 +47,6 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
 
 #[post("/login")]
 async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
-    println!("LOGIN REQUEST HAS BEEN HIT");
     let joined: Result<(UserData, UserPasswordDetails), diesel::result::Error> = user_data::table
         .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
         .filter(user_data::user_name.eq(&req_body.user_name))
@@ -53,9 +55,15 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
     match joined {
         Ok((user, pwd)) => {
             if verify_pwd_state(&pwd.password_hash, &pwd.salt, &req_body.user_password) {
-                return HttpResponse::Ok().body("User Validated!");
+                //if user has been validated send a JWT auth token
+                let user_jwt = gen_jwt(UserToken {
+                    user_email: (&req_body.user_name).clone(),
+                })
+                .unwrap();
+                return HttpResponse::Ok().json(PostLoginDataInfo {
+                    jwt_token: user_jwt,
+                });
             }
-            println!("UserName : {} {}", user.user_name, pwd.salt);
         }
         Err(diesel::result::Error::NotFound) => {
             return HttpResponse::NotFound().body("user not found");
