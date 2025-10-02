@@ -15,6 +15,7 @@ argon2 = {version = "0.5.3", features = ["std"]}
 subtle = "2.6.1"
 chrono = "0.4.34"
 jsonwebtoken = "9.2.0"
+actix-web-httpauth = "0.8.2"
 
 [[bin]]
 name = "star_tracker_rustc"

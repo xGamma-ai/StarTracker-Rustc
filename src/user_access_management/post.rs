@@ -1,4 +1,8 @@
-use actix_web::{HttpResponse, Responder, post, web};
+use actix_web::{
+    Error, HttpMessage, HttpResponse, Responder, dev::ServiceRequest, error::ErrorUnauthorized,
+    post, web,
+};
+use actix_web_httpauth::extractors::bearer::BearerAuth;
 use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelper};
 
 use crate::{
@@ -6,15 +10,27 @@ use crate::{
     models::{UserData, UserPasswordDetails, WriteNewUser, WriteNewUserPassword},
     schema::{password_manager, user_data},
     user_access_management::{
-        jwt::{UserToken, gen_jwt},
+        jwt::{UserToken, gen_jwt, verify_jwt},
         serializers::{PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
     },
     utils::{login_password_hasher, verify_pwd_state},
 };
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
+pub async fn jwt_validate(
+    mut req: ServiceRequest,
+    credentials: BearerAuth,
+) -> Result<ServiceRequest, (Error, ServiceRequest)> {
+    if credentials.token().is_empty() {
+        return Err((ErrorUnauthorized("Invalid token"), req));
+    }
+    let claims = verify_jwt(&credentials.token());
+    match claims {
+        Ok(c) => {
+            req.extensions_mut().insert(c);
+            return Ok(req);
+        }
+        Err(e) => return Err((ErrorUnauthorized(e.to_string()), req)),
+    }
 }
 
 #[post("/register_user")]
@@ -49,7 +65,7 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
 async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
     let joined: Result<(UserData, UserPasswordDetails), diesel::result::Error> = user_data::table
         .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
-        .filter(user_data::user_name.eq(&req_body.user_name))
+        .filter(user_data::user_email.eq(&req_body.user_email))
         .select((UserData::as_select(), UserPasswordDetails::as_select()))
         .first(&mut establish_connection());
     match joined {
@@ -57,7 +73,7 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
             if verify_pwd_state(&pwd.password_hash, &pwd.salt, &req_body.user_password) {
                 //if user has been validated send a JWT auth token
                 let user_jwt = gen_jwt(UserToken {
-                    user_email: (&req_body.user_name).clone(),
+                    user_email: (&req_body.user_email).clone(),
                 })
                 .unwrap();
                 return HttpResponse::Ok().json(PostLoginDataInfo {

@@ -17,11 +17,18 @@ pub struct Claims {
 pub fn gen_jwt(user_details: UserToken) -> Result<String, String> {
     dotenv().ok();
     let jwt_secret_key = std::env::var("JWT_GEN_KEY").expect("Failed to secure the key.");
-    println!("VERIFY_KEY {}", jwt_secret_key);
+    let jwt_exp_time =
+        std::env::var("expiration_mins_jwt").expect("Failed to detect ENV for exp time.");
     let token = encode(
         &Header::default(),
         &Claims {
-            exp: (Utc::now() + Duration::minutes(1)).timestamp(),
+            exp: (Utc::now()
+                + Duration::minutes(
+                    jwt_exp_time
+                        .parse::<i64>()
+                        .expect("Failed to parse into int"),
+                ))
+            .timestamp(),
             user_details: user_details,
         },
         &EncodingKey::from_secret(jwt_secret_key.as_bytes()),
@@ -33,7 +40,6 @@ pub fn gen_jwt(user_details: UserToken) -> Result<String, String> {
 pub fn verify_jwt(token: &str) -> Result<Claims, String> {
     dotenv().ok();
     let jwt_secret_key = std::env::var("JWT_GEN_KEY").expect("Failed to secure the key.");
-    println!("VERIFY_KEY {}", jwt_secret_key);
     let extract_token = decode(
         token,
         &DecodingKey::from_secret(jwt_secret_key.as_bytes()),
