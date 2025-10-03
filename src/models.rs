@@ -32,10 +32,11 @@ pub struct UserPasswordDetails {
     pub salt: String,
 }
 
-#[derive(Queryable, Selectable, Insertable, Clone, Copy)]
+#[derive(Queryable, Selectable, Insertable, Clone)]
 #[diesel(table_name = crate::schema::user_settings)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct UserSettings {
     pub user_id: i32,
     pub enable_online_mode: bool,
+    pub addtional_settings: Option<serde_json::Value>,
 }

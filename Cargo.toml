@@ -6,14 +6,15 @@ rust-version = "1.89.0"
 
 [dependencies]
 actix-web = "4"
-diesel = { version = "2.2.0", features = ["postgres"] }
+diesel = { version = "2.2.0", features = ["postgres","serde_json","chrono"] }
+serde_json = "1.0.145"
 dotenvy = "0.15"
 pq-sys = { version = "0.6", features = ["bundled"] }
 openssl-sys = { version = "0.9.100", features = ["vendored"] } 
 serde = { version = "1.0", features = ["derive"] }
 argon2 = {version = "0.5.3", features = ["std"]}
 subtle = "2.6.1"
-chrono = "0.4.34"
+chrono = { version = "0.4.34", features = ["serde"] }
 jsonwebtoken = "9.2.0"
 actix-web-httpauth = "0.8.2"
 

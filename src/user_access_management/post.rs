@@ -9,6 +9,7 @@ use actix_web::{
 };
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelper};
+use serde_json::json;
 
 use crate::{
     establish_connection,
@@ -16,7 +17,10 @@ use crate::{
     schema::{password_manager, user_data, user_settings},
     user_access_management::{
         jwt::{UserToken, gen_jwt, verify_jwt},
-        serializers::{PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
+        serializers::{
+            AddtionalSettingsFormat, ApiUserSettings, PostLoginDataInfo, UserLoginInfo,
+            UserRegisterInfo,
+        },
     },
     utils::{login_password_hasher, verify_pwd_state},
 };
@@ -58,9 +62,15 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
         salt: salt,
         user_id: created_user.id,
     };
+    let r_json = json!({
+        "json_formation_test":"TEST_JSON_VALUE"
+    });
+    let addi_value =
+        serde_json::from_value(r_json).expect("Failed to parse the serde_json definition.");
     let user_settings = Arc::new(Mutex::new(UserSettings {
         user_id: created_user.id,
         enable_online_mode: false,
+        addtional_settings: Option::Some(addi_value),
     }));
     diesel::insert_into(password_manager::table)
         .values(&new_pwd_data)
@@ -71,7 +81,7 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
     thread::spawn(move || {
         let u_settings_insert = user_settings_arc_clone.lock().unwrap();
         diesel::insert_into(user_settings::table)
-            .values(*u_settings_insert)
+            .values(u_settings_insert.clone())
             .execute(&mut establish_connection())
             .unwrap();
     });
@@ -80,13 +90,19 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
 
 #[post("/login")]
 async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
-    let joined: Result<(UserData, UserPasswordDetails), diesel::result::Error> = user_data::table
-        .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
-        .filter(user_data::user_email.eq(&req_body.user_email))
-        .select((UserData::as_select(), UserPasswordDetails::as_select()))
-        .first(&mut establish_connection());
+    let joined: Result<(UserData, UserPasswordDetails, UserSettings), diesel::result::Error> =
+        user_data::table
+            .inner_join(password_manager::table.on(password_manager::user_id.eq(user_data::id)))
+            .inner_join(user_settings::table.on(user_settings::user_id.eq(user_data::id)))
+            .filter(user_data::user_email.eq(&req_body.user_email))
+            .select((
+                UserData::as_select(),
+                UserPasswordDetails::as_select(),
+                UserSettings::as_select(),
+            ))
+            .first(&mut establish_connection());
     match joined {
-        Ok((user, pwd)) => {
+        Ok((user, pwd, user_set)) => {
             if verify_pwd_state(&pwd.password_hash, &pwd.salt, &req_body.user_password) {
                 //if user has been validated send a JWT auth token
                 let user_jwt = gen_jwt(UserToken {
@@ -95,6 +111,10 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
                 .unwrap();
                 return HttpResponse::Ok().json(PostLoginDataInfo {
                     jwt_token: user_jwt,
+                    user_settings: ApiUserSettings {
+                        addtional_settings: user_set.addtional_settings,
+                        enable_online_mode: user_set.enable_online_mode,
+                    },
                 });
             }
         }

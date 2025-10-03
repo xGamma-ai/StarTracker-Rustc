@@ -28,7 +28,7 @@ diesel::table! {
         enable_online_mode -> Bool,
         created_at -> Timestamp,
         updated_at -> Timestamp,
-        addtional_settings -> Nullable<Varchar>,
+        addtional_settings -> Nullable<Jsonb>,
     }
 }
 
