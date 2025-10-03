@@ -21,6 +21,18 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(password_manager -> user_data (user_id));
+diesel::table! {
+    user_settings (id) {
+        id -> Int4,
+        user_id -> Int4,
+        enable_online_mode -> Bool,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        addtional_settings -> Nullable<Varchar>,
+    }
+}
 
-diesel::allow_tables_to_appear_in_same_query!(password_manager, user_data,);
+diesel::joinable!(password_manager -> user_data (user_id));
+diesel::joinable!(user_settings -> user_data (user_id));
+
+diesel::allow_tables_to_appear_in_same_query!(password_manager, user_data, user_settings,);

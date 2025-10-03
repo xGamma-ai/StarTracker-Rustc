@@ -1,0 +1,9 @@
+-- Your SQL goes here
+CREATE TABLE user_settings(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES user_data(id) ON DELETE CASCADE,
+    enable_online_mode BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id)
+);

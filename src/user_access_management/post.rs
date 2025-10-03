@@ -1,3 +1,8 @@
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+};
+
 use actix_web::{
     Error, HttpMessage, HttpResponse, Responder, dev::ServiceRequest, error::ErrorUnauthorized,
     post, web,
@@ -7,8 +12,8 @@ use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelp
 
 use crate::{
     establish_connection,
-    models::{UserData, UserPasswordDetails, WriteNewUser, WriteNewUserPassword},
-    schema::{password_manager, user_data},
+    models::{UserData, UserPasswordDetails, UserSettings, WriteNewUser, WriteNewUserPassword},
+    schema::{password_manager, user_data, user_settings},
     user_access_management::{
         jwt::{UserToken, gen_jwt, verify_jwt},
         serializers::{PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
@@ -53,11 +58,23 @@ async fn register_user(req_body: web::Json<UserRegisterInfo>) -> impl Responder 
         salt: salt,
         user_id: created_user.id,
     };
+    let user_settings = Arc::new(Mutex::new(UserSettings {
+        user_id: created_user.id,
+        enable_online_mode: false,
+    }));
     diesel::insert_into(password_manager::table)
         .values(&new_pwd_data)
         .execute(&mut establish_connection())
         .expect("Failed to save the new hashed password");
 
+    let user_settings_arc_clone = Arc::clone(&user_settings);
+    thread::spawn(move || {
+        let u_settings_insert = user_settings_arc_clone.lock().unwrap();
+        diesel::insert_into(user_settings::table)
+            .values(*u_settings_insert)
+            .execute(&mut establish_connection())
+            .unwrap();
+    });
     HttpResponse::Ok().body(format!("New User added {}", &req_body.user_name))
 }
 

@@ -31,3 +31,11 @@ pub struct UserPasswordDetails {
     pub password_hash: Vec<u8>,
     pub salt: String,
 }
+
+#[derive(Queryable, Selectable, Insertable, Clone, Copy)]
+#[diesel(table_name = crate::schema::user_settings)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct UserSettings {
+    pub user_id: i32,
+    pub enable_online_mode: bool,
+}
