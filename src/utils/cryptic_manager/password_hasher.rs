@@ -4,8 +4,6 @@ use argon2::{
 };
 use subtle::ConstantTimeEq;
 
-use crate::{establish_connection, models::UserPasswordDetails};
-
 pub fn login_password_hasher(password: &String) -> (Vec<u8>, String) {
     let salt = SaltString::generate(&mut OsRng);
     let mut out: Vec<u8> = vec![0u8; 32];

@@ -17,16 +17,13 @@ use crate::{
     schema::{password_manager, user_data, user_settings},
     user_access_management::{
         jwt::{UserToken, gen_jwt, verify_jwt},
-        serializers::{
-            AddtionalSettingsFormat, ApiUserSettings, PostLoginDataInfo, UserLoginInfo,
-            UserRegisterInfo,
-        },
+        serializers::{ApiUserSettings, PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
     },
     utils::{login_password_hasher, verify_pwd_state},
 };
 
 pub async fn jwt_validate(
-    mut req: ServiceRequest,
+    req: ServiceRequest,
     credentials: BearerAuth,
 ) -> Result<ServiceRequest, (Error, ServiceRequest)> {
     if credentials.token().is_empty() {
@@ -102,7 +99,7 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
             ))
             .first(&mut establish_connection());
     match joined {
-        Ok((user, pwd, user_set)) => {
+        Ok((_user, pwd, user_set)) => {
             if verify_pwd_state(&pwd.password_hash, &pwd.salt, &req_body.user_password) {
                 //if user has been validated send a JWT auth token
                 let user_jwt = gen_jwt(UserToken {
@@ -121,7 +118,7 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
         Err(diesel::result::Error::NotFound) => {
             return HttpResponse::NotFound().body("user not found");
         }
-        Err(e) => {
+        Err(_e) => {
             return HttpResponse::InternalServerError().body("failed to execute login.");
         }
     }

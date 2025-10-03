@@ -5,8 +5,8 @@ pub mod user_access_management;
 pub mod utils;
 
 use crate::user_access_management::*;
-use actix_web::{App, Error, HttpResponse, HttpServer, Responder, dev::ServiceRequest, web};
-use actix_web_httpauth::{extractors::bearer::BearerAuth, middleware::HttpAuthentication};
+use actix_web::{App, HttpResponse, HttpServer, Responder, web};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use diesel::prelude::*;
 use dotenvy::dotenv;
 
