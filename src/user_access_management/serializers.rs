@@ -27,7 +27,7 @@ pub struct ApiUserSettings {
     pub enable_online_mode: bool,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct AddtionalSettingsFormat {
     pub selected_theme: Option<String>,
     pub device_os: Option<String>,

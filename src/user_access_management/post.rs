@@ -4,8 +4,8 @@ use std::{
 };
 
 use actix_web::{
-    Error, HttpMessage, HttpResponse, Responder, dev::ServiceRequest, error::ErrorUnauthorized,
-    post, web,
+    Error, HttpMessage, HttpRequest, HttpResponse, Responder, dev::ServiceRequest,
+    error::ErrorUnauthorized, post, web,
 };
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelper};
@@ -16,10 +16,13 @@ use crate::{
     models::{UserData, UserPasswordDetails, UserSettings, WriteNewUser, WriteNewUserPassword},
     schema::{password_manager, user_data, user_settings},
     user_access_management::{
-        jwt::{UserToken, gen_jwt, verify_jwt},
-        serializers::{ApiUserSettings, PostLoginDataInfo, UserLoginInfo, UserRegisterInfo},
+        jwt::{Claims, UserToken, gen_jwt, verify_jwt},
+        serializers::{
+            AddtionalSettingsFormat, ApiUserSettings, PostLoginDataInfo, UserLoginInfo,
+            UserRegisterInfo,
+        },
     },
-    utils::{login_password_hasher, verify_pwd_state},
+    utils::{fetch_user_details, login_password_hasher, verify_pwd_state},
 };
 
 pub async fn jwt_validate(
@@ -123,4 +126,14 @@ async fn login_user(req_body: web::Json<UserLoginInfo>) -> impl Responder {
         }
     }
     return HttpResponse::InternalServerError().body("failed to execute login.");
+}
+
+#[post("/update-settings")]
+async fn update_user_settings(
+    main_req: HttpRequest,
+    req: web::Json<AddtionalSettingsFormat>,
+) -> impl Responder {
+    let fetched_user_data = fetch_user_details(main_req);
+    // println!("{}", user_settings_data.unwrap().enable_online_mode);
+    return HttpResponse::Ok().json(fetched_user_data);
 }

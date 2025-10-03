@@ -1,6 +1,7 @@
 use diesel::prelude::*;
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::user_data)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct UserData {
@@ -32,7 +33,7 @@ pub struct UserPasswordDetails {
     pub salt: String,
 }
 
-#[derive(Queryable, Selectable, Insertable, Clone)]
+#[derive(Queryable, Selectable, Insertable, Clone, Serialize, Deserialize)]
 #[diesel(table_name = crate::schema::user_settings)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct UserSettings {

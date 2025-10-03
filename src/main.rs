@@ -29,7 +29,12 @@ async fn main() -> std::io::Result<()> {
             .route("/health", web::get().to(health_check))
             .service(register_user)
             .service(login_user)
-            .service(web::scope("/api").wrap(auth.clone()).service(verify_user))
+            .service(
+                web::scope("/api")
+                    .wrap(auth.clone())
+                    .service(verify_user)
+                    .service(update_user_settings),
+            )
     })
     .bind((host, port))?
     .run()

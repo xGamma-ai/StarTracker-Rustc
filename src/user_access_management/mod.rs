@@ -1,6 +1,6 @@
 mod __tests__;
 pub mod get;
-mod jwt;
+pub mod jwt;
 pub mod post;
 mod serializers;
 
